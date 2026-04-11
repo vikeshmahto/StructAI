@@ -28,27 +28,45 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { prompt: rawPrompt, stack, preferences } = body;
+  const { prompt: rawPrompt, documentText, stack, preferences } = body;
 
-  if (!rawPrompt || typeof rawPrompt !== "string" || rawPrompt.length < 10) {
+  const hasPrompt = rawPrompt && typeof rawPrompt === "string" && rawPrompt.length >= 10;
+  const hasDocument = documentText && typeof documentText === "string" && documentText.length > 0;
+
+  if (!hasPrompt && !hasDocument) {
     return NextResponse.json(
-      { error: "Please provide a more detailed description (at least 10 characters)." },
+      { error: "Please provide a project description (at least 10 characters) or upload a requirements document." },
       { status: 400 }
     );
   }
 
   // 3. Sanitize and check for injection
-  const prompt = sanitizePrompt(rawPrompt);
+  const prompt = hasPrompt ? sanitizePrompt(rawPrompt) : "";
 
-  if (detectPromptInjection(prompt)) {
+  if (prompt && detectPromptInjection(prompt)) {
     return NextResponse.json(
       { error: "Your input contains potentially harmful patterns. Please rephrase." },
       { status: 400 }
     );
   }
 
-  // 4. Build AI prompt
-  const systemPrompt = buildSystemPrompt({ prompt, stack, preferences });
+  // 4. Build AI prompt — merge document text with user prompt
+  const systemPrompt = buildSystemPrompt({
+    prompt,
+    documentText: hasDocument ? documentText : undefined,
+    stack,
+    preferences,
+  });
+
+  // Build the user message — document takes priority, prompt adds context
+  let userMessage = "";
+  if (hasDocument && hasPrompt) {
+    userMessage = `REQUIREMENTS DOCUMENT:\n---\n${documentText}\n---\n\nADDITIONAL CONTEXT FROM USER:\n${prompt}`;
+  } else if (hasDocument) {
+    userMessage = `REQUIREMENTS DOCUMENT:\n---\n${documentText}\n---`;
+  } else {
+    userMessage = `User requirement: ${prompt}`;
+  }
 
   // 5. Call OpenRouter with retry logic
   let rawJson = "";
@@ -61,10 +79,11 @@ export async function POST(req: NextRequest) {
         model: "google/gemini-2.0-flash-001",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `User requirement: ${prompt}` },
+          { role: "user", content: userMessage },
         ],
         response_format: { type: "json_object" },
         temperature: 0.3,
+        max_tokens: 8192,
       });
 
       rawJson = response.choices[0].message.content || "";

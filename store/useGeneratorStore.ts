@@ -8,10 +8,19 @@ export type GenerationStep =
   | "processing"
   | "done";
 
+export type DocumentStatus = "idle" | "parsing" | "success" | "error";
+
 interface GeneratorStore {
   // Input
   prompt: string;
   selectedStack: string[];
+
+  // Document upload
+  documentFile: File | null;
+  documentText: string;
+  documentStatus: DocumentStatus;
+  documentError: string | null;
+  documentWordCount: number;
 
   // Output
   project: ProjectStructure | null;
@@ -26,6 +35,8 @@ interface GeneratorStore {
   // Actions
   setPrompt: (p: string) => void;
   toggleStack: (s: string) => void;
+  setDocumentFile: (file: File) => void;
+  removeDocument: () => void;
   generate: () => Promise<void>;
   selectFile: (f: FileSystemNode | null, path?: string) => void;
   downloadZip: () => Promise<void>;
@@ -35,6 +46,11 @@ interface GeneratorStore {
 export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
   prompt: "",
   selectedStack: [],
+  documentFile: null,
+  documentText: "",
+  documentStatus: "idle",
+  documentError: null,
+  documentWordCount: 0,
   project: null,
   isLoading: false,
   error: null,
@@ -51,11 +67,69 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
         : [...state.selectedStack, stack],
     })),
 
-  generate: async () => {
-    const { prompt, selectedStack } = get();
+  setDocumentFile: async (file: File) => {
+    set({
+      documentFile: file,
+      documentStatus: "parsing",
+      documentError: null,
+      documentText: "",
+      documentWordCount: 0,
+    });
 
-    if (!prompt || prompt.length < 10) {
-      set({ error: "Please describe your project in more detail (at least 10 characters)." });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/parse-document", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        set({
+          documentStatus: "error",
+          documentError: data.message || "Failed to parse document.",
+        });
+        return;
+      }
+
+      set({
+        documentText: data.extractedText,
+        documentWordCount: data.wordCount,
+        documentStatus: "success",
+      });
+    } catch (err) {
+      set({
+        documentStatus: "error",
+        documentError:
+          err instanceof Error ? err.message : "Failed to upload document.",
+      });
+    }
+  },
+
+  removeDocument: () =>
+    set({
+      documentFile: null,
+      documentText: "",
+      documentStatus: "idle",
+      documentError: null,
+      documentWordCount: 0,
+    }),
+
+  generate: async () => {
+    const { prompt, selectedStack, documentText } = get();
+
+    // At least one of prompt or document must be provided
+    const hasPrompt = prompt && prompt.length >= 10;
+    const hasDocument = documentText && documentText.length > 0;
+
+    if (!hasPrompt && !hasDocument) {
+      set({
+        error:
+          "Please describe your project (at least 10 characters) or upload a requirements document.",
+      });
       return;
     }
 
@@ -75,7 +149,8 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt,
+          prompt: prompt || undefined,
+          documentText: hasDocument ? documentText : undefined,
           stack: selectedStack.length > 0 ? selectedStack : undefined,
         }),
       });

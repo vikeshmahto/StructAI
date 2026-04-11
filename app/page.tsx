@@ -1,6 +1,7 @@
 "use client";
 
 import PromptInput from "@/components/generator/PromptInput";
+import DocumentUpload from "@/components/generator/DocumentUpload";
 import StackSelector from "@/components/generator/StackSelector";
 import GenerateButton from "@/components/generator/GenerateButton";
 import FileTree from "@/components/tree/FileTree";
@@ -57,14 +58,36 @@ export default function Home() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Type your idea in plain English → get a complete folder
+                  Type your idea in plain English or upload a requirements
+                  document (.pdf, .docx, .txt, .md) → get a complete folder
                   structure, boilerplate files, README, and .env template —
                   downloaded as a .zip in seconds.
                 </motion.p>
               </div>
 
               <div className="generator-card">
+                {/* Divider label for input mode */}
+                <div className="input-mode-header">
+                  <div className="input-mode-badge">
+                    <span className="input-mode-badge-icon">✦</span>
+                    Choose your input method
+                  </div>
+                  <p className="input-mode-hint">
+                    Describe your project with text, upload a document, or both
+                  </p>
+                </div>
+
                 <PromptInput />
+
+                {/* OR Divider */}
+                <div className="input-divider">
+                  <div className="input-divider-line" />
+                  <span className="input-divider-text">OR</span>
+                  <div className="input-divider-line" />
+                </div>
+
+                <DocumentUpload />
+
                 <StackSelector />
                 <GenerateButton />
 
