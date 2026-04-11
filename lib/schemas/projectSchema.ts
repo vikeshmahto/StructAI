@@ -6,6 +6,7 @@ const envVariableSchema = z.object({
   example: z.string(),
   required: z.boolean(),
   sensitive: z.boolean().default(false),
+
 });
 
 const fileSystemNodeSchema: z.ZodType<unknown> = z.lazy(() =>
