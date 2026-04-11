@@ -1,0 +1,46 @@
+{
+  "name": "struct-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
+    "archiver": "^7.0.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.1",
+    "framer-motion": "^12.38.0",
+    "isomorphic-dompurify": "^3.8.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.8.0",
+    "next": "16.2.3",
+    "openai": "^6.34.0",
+    "prismjs": "^1.30.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/archiver": "^7.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
