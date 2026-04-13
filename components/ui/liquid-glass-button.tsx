@@ -38,7 +38,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
@@ -112,9 +112,9 @@ function LiquidButton({
         )}
         {...props}
       >
-        <div className="absolute top-0 left-0 z-0 h-full w-full rounded-full 
-            shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.9),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.85),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.6),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.6),inset_0_0_6px_6px_rgba(0,0,0,0.12),inset_0_0_2px_2px_rgba(0,0,0,0.06),0_0_12px_rgba(255,255,255,0.15)] 
-        transition-all 
+        <div className="absolute top-0 left-0 z-0 h-full w-full rounded-full
+            shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.9),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.85),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.6),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.6),inset_0_0_6px_6px_rgba(0,0,0,0.12),inset_0_0_2px_2px_rgba(0,0,0,0.06),0_0_12px_rgba(255,255,255,0.15)]
+        transition-all
         dark:shadow-[0_0_8px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3.5px_rgba(255,255,255,0.09),inset_-3px_-3px_0.5px_-3.5px_rgba(255,255,255,0.85),inset_1px_1px_1px_-0.5px_rgba(255,255,255,0.6),inset_-1px_-1px_1px_-0.5px_rgba(255,255,255,0.6),inset_0_0_6px_6px_rgba(255,255,255,0.12),inset_0_0_2px_2px_rgba(255,255,255,0.06),0_0_12px_rgba(0,0,0,0.15)]" />
         <div
           className="absolute top-0 left-0 isolate -z-10 h-full w-full overflow-hidden rounded-md"
@@ -182,12 +182,12 @@ type ColorVariant =
   | "error"
   | "gold"
   | "bronze";
- 
+
 interface MetalButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ColorVariant;
 }
- 
+
 const colorVariants: Record<
   ColorVariant,
   {
@@ -241,7 +241,7 @@ const colorVariants: Record<
     textShadow: "[text-shadow:_0_-1px_0_rgb(124_45_18_/_100%)]",
   },
 };
- 
+
 const metalButtonVariants = (
   variant: ColorVariant = "default",
   isPressed: boolean,
@@ -250,7 +250,7 @@ const metalButtonVariants = (
 ) => {
   const colors = colorVariants[variant];
   const transitionStyle = "all 250ms cubic-bezier(0.1, 0.4, 0.2, 1)";
- 
+
   return {
     wrapper: cn(
       "relative inline-flex transform-gpu rounded-md p-[1.25px] will-change-transform",
@@ -293,7 +293,7 @@ const metalButtonVariants = (
     },
   };
 };
- 
+
 const ShineEffect = ({ isPressed }: { isPressed: boolean }) => {
   return (
     <div
@@ -306,7 +306,7 @@ const ShineEffect = ({ isPressed }: { isPressed: boolean }) => {
     </div>
   );
 };
- 
+
 export const MetalButton = React.forwardRef<
   HTMLButtonElement,
   MetalButtonProps
@@ -314,11 +314,11 @@ export const MetalButton = React.forwardRef<
   const [isPressed, setIsPressed] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
   const [isTouchDevice, setIsTouchDevice] = React.useState(false);
- 
+
   React.useEffect(() => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
- 
+
   const buttonText = children || "Button";
   const variants = metalButtonVariants(
     variant,
@@ -326,7 +326,7 @@ export const MetalButton = React.forwardRef<
     isHovered,
     isTouchDevice,
   );
- 
+
   const handleInternalMouseDown = () => {
     setIsPressed(true);
   };
@@ -351,7 +351,7 @@ export const MetalButton = React.forwardRef<
   const handleInternalTouchCancel = () => {
     setIsPressed(false);
   };
- 
+
   return (
     <div className={variants.wrapper} style={variants.wrapperStyle}>
       <div className={variants.inner} style={variants.innerStyle}></div>
@@ -377,5 +377,5 @@ export const MetalButton = React.forwardRef<
     </div>
   );
 });
- 
+
 MetalButton.displayName = "MetalButton";
