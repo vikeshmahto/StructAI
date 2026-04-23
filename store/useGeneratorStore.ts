@@ -1,12 +1,7 @@
 import { create } from "zustand";
-import type { ProjectStructure, FileSystemNode } from "@/types/project";
+import type { ProjectStructure, FileSystemNode, MigrationResult } from "@/types/project";
 
-export type GenerationStep =
-  | "idle"
-  | "thinking"
-  | "generating"
-  | "processing"
-  | "done";
+export type GenerationStep = "idle" | "thinking" | "generating" | "processing" | "done";
 
 export type DocumentStatus = "idle" | "parsing" | "success" | "error";
 
@@ -32,6 +27,11 @@ interface GeneratorStore {
   selectedFile: FileSystemNode | null;
   selectedFilePath: string;
 
+  // Migration
+  migration: MigrationResult | null;
+  isMigrationLoading: boolean;
+  migrationError: string | null;
+
   // Actions
   setPrompt: (p: string) => void;
   toggleStack: (s: string) => void;
@@ -40,6 +40,8 @@ interface GeneratorStore {
   generate: () => Promise<void>;
   selectFile: (f: FileSystemNode | null, path?: string) => void;
   downloadZip: () => Promise<void>;
+  generateMigration: () => Promise<void>;
+  downloadMigration: () => void;
   reset: () => void;
 }
 
@@ -57,6 +59,9 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
   generationStep: "idle",
   selectedFile: null,
   selectedFilePath: "",
+  migration: null,
+  isMigrationLoading: false,
+  migrationError: null,
 
   setPrompt: (prompt) => set({ prompt }),
 
@@ -103,8 +108,7 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
     } catch (err) {
       set({
         documentStatus: "error",
-        documentError:
-          err instanceof Error ? err.message : "Failed to upload document.",
+        documentError: err instanceof Error ? err.message : "Failed to upload document.",
       });
     }
   },
@@ -171,8 +175,49 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
     }
   },
 
-  selectFile: (selectedFile, path = "") =>
-    set({ selectedFile, selectedFilePath: path }),
+  selectFile: (selectedFile, path = "") => set({ selectedFile, selectedFilePath: path }),
+
+  generateMigration: async () => {
+    const { project } = get();
+    if (!project) return;
+
+    set({ isMigrationLoading: true, migrationError: null, migration: null });
+
+    try {
+      const res = await fetch("/api/generate-migration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Migration generation failed");
+      }
+
+      set({ migration: data.migration });
+    } catch (err) {
+      set({
+        migrationError: err instanceof Error ? err.message : "Migration generation failed",
+      });
+    } finally {
+      set({ isMigrationLoading: false });
+    }
+  },
+
+  downloadMigration: () => {
+    const { migration } = get();
+    if (!migration) return;
+
+    const blob = new Blob([migration.migrationContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = migration.fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 
   downloadZip: async () => {
     const { project } = get();
@@ -208,5 +253,7 @@ export const useGeneratorStore = create<GeneratorStore>((set, get) => ({
       generationStep: "idle",
       selectedFile: null,
       selectedFilePath: "",
+      migration: null,
+      migrationError: null,
     }),
 }));
