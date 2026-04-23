@@ -9,6 +9,7 @@ import FilePreview from "@/components/tree/FilePreview";
 import ProjectMeta from "@/components/output/ProjectMeta";
 import SetupCommands from "@/components/output/SetupCommands";
 import EnvVariables from "@/components/output/EnvVariables";
+import MigrationFile from "@/components/output/MigrationFile";
 import DownloadButton from "@/components/output/DownloadButton";
 import Header from "@/components/layout/Header";
 import { useGeneratorStore } from "@/store/useGeneratorStore";
@@ -186,6 +187,8 @@ export default function GeneratePage() {
                 <SetupCommands />
                 <EnvVariables />
               </div>
+
+              <MigrationFile />
             </motion.section>
           )}
         </AnimatePresence>

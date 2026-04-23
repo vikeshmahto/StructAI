@@ -40,3 +40,10 @@ export interface GenerateErrorResponse {
   error: string;
   details?: unknown;
 }
+
+export interface MigrationResult {
+  dbType: string;
+  fileName: string;
+  migrationContent: string;
+  runInstructions: string[];
+}
