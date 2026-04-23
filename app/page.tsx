@@ -9,7 +9,7 @@ import Header from "@/components/layout/Header";
 export default function Home() {
   return (
     <div className="app">
-      {/* Ambient background effects */}
+      {/* Ambient background effects. */}
       <div className="bg-gradient" />
       <div className="bg-grid" />
 
